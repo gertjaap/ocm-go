@@ -46,12 +46,6 @@ func main() {
 	// create the qml application engine
 	engine := qml.NewQQmlApplicationEngine(nil)
 
-	// load the embeeded qml file
-	// created by either qtrcc or qtdeploy
-	engine.Load(core.NewQUrl3("qrc:/qml/main.qml", 0))
-	// you can also load a local file like this instead:
-	//engine.Load(core.QUrl_FromLocalFile("./qml/main.qml"))
-
 	viewModel := NewViewModel(nil)
 	viewModel.SetInitStatus("Initializing...")
 	viewModel.SetActivePage("init")
@@ -60,6 +54,8 @@ func main() {
 	initListeners(viewModel)
 
 	statusChan <- "Initializing..."
+
+	engine.Load(core.NewQUrl3("qrc:/qml/main.qml", 0))
 
 	go setup()
 
