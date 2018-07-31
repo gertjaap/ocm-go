@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="app.css" type="text/css" />
+        <script language="javascript" type="text/javascript" src="main.js"></script>
+    </head>
+    <body>
+        <div class="container" id="initPage">
+            <div class="header"></div>
+            <div class="content">
+                <div class="appTitle">
+                    <p>Vertcoin - OneClick Miner</p>
+                </div>
+        
+                <form>
+                    <label>
+                        <p id="status">Initializing...</p>
+                    </label>
+                </form>
+            </div>
+        </div>
+        <div class="container" id="mainPage" style="display:none">
+            <div class="header"></div>
+            <div class="content">
+                <div class="appTitle">
+                    <p>Vertcoin - OneClick Miner</p>
+                </div>
+        
+                <form>
+                    <label>
+        
+                        <input autoFocus type="text" name="name" id="walletAddress" placeholder="Enter Your Wallet Address" />
+                    </label>
+                    <input type="button" onclick="startMining()" value="Start Mining" />
+                </form>
+        
+            </div>
+            <div class="noWallet"><a href="https://github.com/vertcoin-project/vertcoin-core/releases" target="blank">Don't Have A Wallet?</a></div>
+            <div class="settings"><a href="settings" target="blank">Settings</a></div>
+        </div>
+        <div class="container" id="miningPage" style="display:none">
+            <div class="header"></div>
+            <div class="content">
+                <div class="appTitle">
+                    <p>Vertcoin - OneClick Miner</p>
+                </div>
+        
+                <form>
+                    <label>
+                        <p>Mining...</p>>
+                    </label>
+                </form>
+            </div>
+        </div>
+        <div class="container" id="panicPage" style="display:none">
+            <div class="header"></div>
+            <div class="content">
+                <div class="appTitle">
+                    <p>Vertcoin - OneClick Miner - Whoops... I paniced</p>
+                </div>
+        
+                <form>
+                    <label>
+                        <p id="panic"></p>
+                    </label>
+                </form>
+            </div>
+        </div>
+    </body>
+</html>

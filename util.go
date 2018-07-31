@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 )
 
@@ -82,10 +83,33 @@ func UnzipFile(src string, dest string) error {
 }
 
 func GetGPU() string {
-	Info := exec.Command("cmd", "/C", "wmic path win32_VideoController get name")
-	History, _ := Info.Output()
+	if runtime.GOOS == "windows" {
+		Info := exec.Command("cmd", "/C", "wmic path win32_VideoController get name")
+		History, _ := Info.Output()
 
-	return strings.TrimSpace(strings.Replace(string(History), "Name", "", -1))
+		return strings.TrimSpace(strings.Replace(string(History), "Name", "", -1))
+	} else if runtime.GOOS == "linux" {
+		Info := exec.Command("lspci")
+		History, _ := Info.Output()
+		lines := strings.Split(string(History), "\n")
+		lastGpu := ""
+		for _, l := range lines {
+			if strings.Contains(l, "VGA compatible") {
+				// this is a GPU
+				lastGpu = l
+			}
+
+			if strings.Contains(lastGpu, " NVIDIA ") {
+				return lastGpu
+			} else if strings.Contains(lastGpu, " AMD ") {
+				return lastGpu
+			}
+		}
+		return lastGpu
+	} else {
+		return "Unknown OS, unable to detect GPU"
+	}
+
 }
 
 func ReplaceInFile(file string, find string, replace string) error {

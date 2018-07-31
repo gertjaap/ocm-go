@@ -1,0 +1,125 @@
+* {
+	  font-family: Montserrat;
+	  box-sizing: border-box;
+}
+
+*::selection {
+	   
+    background: transparent;
+
+}
+
+html {
+	  background: #202225;
+}
+
+
+a {
+	/*transition: all 0.25s ease 0s;*/
+}
+
+a:hover {
+	color: #ccc
+}
+
+
+h1 {
+  font-family: helvetica;
+  font-weight: 200;
+}
+
+body {
+
+
+  color: white;
+  text-align: center;
+  font-size: 14px;
+  overflow: hidden;
+  max-width: 660px;
+  margin: 0 auto;
+  
+
+}
+
+input {
+	height: 76px;
+	font-size: 16px;
+	max-width: 519px;
+	width: 100%;
+	border-radius: 5px;
+	border: 1px solid #048657;
+	background: transparent;
+	margin-bottom: 37px;
+	padding: 0px 22px;
+	color: #cdcdcd;
+}
+
+input[type="submit"] {
+	max-width: 519px;
+	width: 100%;
+	height: 80px;
+	border-radius: 5px;
+	background: #048657;
+	border: none;
+	color: white;
+	font-size: 16px;
+	box-shadow: 0px 12px 20px rgba(38, 172, 117, 0.17);
+	cursor: pointer;
+}
+
+input:focus {
+    outline: none !important;
+}
+
+
+
+a {
+	text-decoration: none;
+	color: #555;
+}
+
+p {
+	font-size: 16px;
+	color: #555;
+	width: 100%;
+}
+
+
+.header {
+	width: 100%;
+	height: 46px;
+	-webkit-user-select: none;
+  -webkit-app-region: drag;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+}
+
+
+.content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+    height: 100vh;
+}
+
+.appTitle {
+	    width: 100%;
+    text-align: center;
+    margin-bottom: 40px;
+    position: relative;
+}
+
+.noWallet {
+	position: absolute;
+	bottom: 35px;
+	left: 25px;
+}
+
+.settings {
+	position: absolute;
+	bottom: 35px;
+	right: 34px;
+}

@@ -1,0 +1,5 @@
+miners/
+linux/
+deploy/
+rcc_cgo_linux_linux_amd64.go
+rcc.cpp
