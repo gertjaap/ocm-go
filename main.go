@@ -4,14 +4,14 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"net/http"
 	"os"
 	"os/exec"
 	"strings"
 
 	"github.com/therecipe/qt/core"
-	"github.com/therecipe/qt/webengine"
-	"github.com/therecipe/qt/widgets"
+	"github.com/therecipe/qt/gui"
+	"github.com/therecipe/qt/qml"
+	"github.com/therecipe/qt/quickcontrols2"
 )
 
 var GPUType string
@@ -21,53 +21,78 @@ var switchPageChan chan string
 var stopMiningChan chan bool
 var hashrateChan chan int
 
+type ViewModel struct {
+	core.QObject
+
+	_ string `property:"initStatus"`
+	_ string `property:"activePage"`
+}
+
 func main() {
 	fmt.Println("Vertcoin OCM Starting up...")
-	widgets.NewQApplication(len(os.Args), os.Args)
-	webengine.QtWebEngine_Initialize()
-	var window = widgets.NewQMainWindow(nil, 0)
-	window.SetWindowTitle("Vertcoin One Click Miner")
+	// enable high dpi scaling
+	// useful for devices with high pixel density displays
+	// such as smartphones, retina displays, ...
+	core.QCoreApplication_SetAttribute(core.Qt__AA_EnableHighDpiScaling, true)
 
-	var view = webengine.NewQWebEngineView(nil)
-	view.Load(core.NewQUrl3("qrc:/web/index.html", 0))
+	// needs to be called once before you can start using QML
+	gui.NewQGuiApplication(len(os.Args), os.Args)
 
-	window.SetCentralWidget(view)
-	window.Show()
+	// use the material style
+	// the other inbuild styles are:
+	// Default, Fusion, Imagine, Universal
+	quickcontrols2.QQuickStyle_SetStyle("Default")
 
-	view.ConnectLoadFinished(func(vbo bool) {
-		if vbo {
-			initListeners(view)
-			go setup()
-		}
-	})
+	// create the qml application engine
+	engine := qml.NewQQmlApplicationEngine(nil)
 
-	widgets.QApplication_Exec()
+	// load the embeeded qml file
+	// created by either qtrcc or qtdeploy
+	engine.Load(core.NewQUrl3("qrc:/qml/main.qml", 0))
+	// you can also load a local file like this instead:
+	//engine.Load(core.QUrl_FromLocalFile("./qml/main.qml"))
+
+	viewModel := NewViewModel(nil)
+	viewModel.SetInitStatus("Initializing...")
+	viewModel.SetActivePage("init")
+	engine.RootContext().SetContextProperty("viewModel", viewModel)
+
+	initListeners(viewModel)
+
+	statusChan <- "Initializing..."
+
+	go setup()
+
+	// start the main Qt event loop
+	// and block until app.Exit() is called
+	// or the window is closed by the user
+	gui.QGuiApplication_Exec()
 }
 
-func initListeners(view *webengine.QWebEngineView) {
+func initListeners(viewModel *ViewModel) {
 	statusChan = make(chan string)
 	switchPageChan = make(chan string)
-	panicChan = make(chan error)
-	stopMiningChan = make(chan bool)
-	hashrateChan = make(chan int)
+	/*
+		panicChan = make(chan error)
+		stopMiningChan = make(chan bool)
+		hashrateChan = make(chan int)*/
 
-	go initStatusListener(view)
-	go panicListener(view)
-	go switchPageListener(view)
+	go initStatusListener(viewModel)
+	go switchPageListener(viewModel)
+	/*go panicListener(view)
+
 	go hashrateListener(view)
-	go httpListener(view)
+	go httpListener(view)*/
 }
 
-func initStatusListener(view *webengine.QWebEngineView) {
+func initStatusListener(viewModel *ViewModel) {
 	for {
 		status := <-statusChan
-		status = strings.Replace(status, "'", "''", -1)
-		script := fmt.Sprintf("setStatus('%s')", status)
-		view.Page().RunJavaScript(script)
+		viewModel.SetInitStatus(status)
 	}
 }
 
-func panicListener(view *webengine.QWebEngineView) {
+/*func panicListener(view *webengine.QWebEngineView) {
 	for {
 		err := <-panicChan
 		errString := strings.Replace(err.Error(), "'", "''", -1)
@@ -83,51 +108,12 @@ func hashrateListener(view *webengine.QWebEngineView) {
 		view.Page().RunJavaScript(script)
 	}
 }
+*/
 
-func switchPageListener(view *webengine.QWebEngineView) {
+func switchPageListener(viewModel *ViewModel) {
 	for {
 		nextPage := <-switchPageChan
-		script := fmt.Sprintf("showPage('%s')", nextPage)
-		view.Page().RunJavaScript(script)
-	}
-}
-
-func corsHandler(h http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		fmt.Printf("[%s] %s\n", r.Method, r.URL)
-		headers := w.Header()
-		headers.Add("Access-Control-Allow-Origin", "qrc://")
-		headers.Add("Access-Control-Allow-Headers", "Content-Type, Origin, Accept")
-		headers.Add("Access-Control-Allow-Methods", "GET,OPTIONS")
-
-		if r.Method == "OPTIONS" {
-			w.WriteHeader(http.StatusOK)
-		} else {
-			h(w, r)
-		}
-	}
-}
-
-func httpListener(view *webengine.QWebEngineView) {
-	http.HandleFunc("/startmining", corsHandler(func(resp http.ResponseWriter, req *http.Request) {
-		startMining(req.URL.Query().Get("address"))
-	}))
-	http.HandleFunc("/stopmining", corsHandler(func(resp http.ResponseWriter, req *http.Request) {
-		stopMining()
-	}))
-	port := 32001
-	listenString := fmt.Sprintf("127.0.0.1:%d", port)
-	view.Page().RunJavaScript(fmt.Sprintf("setHost('http://%s')", listenString))
-	fmt.Printf("Listening on %s\n", listenString)
-	err := http.ListenAndServe(listenString, nil)
-
-	for err != nil {
-		fmt.Println(err.Error())
-		port++
-		listenString := fmt.Sprintf("127.0.0.1:%d", port)
-		fmt.Printf("Listening on %s\n", listenString)
-		view.Page().RunJavaScript(fmt.Sprintf("setHost('http://%s')", listenString))
-		err = http.ListenAndServe(listenString, nil)
+		viewModel.SetActivePage(nextPage)
 	}
 }
 
@@ -221,7 +207,7 @@ func setup() {
 		return
 	}
 
-	switchPageChan <- "mainPage"
+	switchPageChan <- "start"
 }
 
 func startMining(address string) {

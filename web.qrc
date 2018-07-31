@@ -1,7 +1,0 @@
-<!DOCTYPE RCC><RCC version="1.0">
-<qresource>
-<file>web/index.html</file>
-<file>web/app.css</file>
-<file>web/main.js</file>
-</qresource>
-</RCC>
