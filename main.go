@@ -26,6 +26,7 @@ type ViewModel struct {
 
 	_ string `property:"initStatus"`
 	_ string `property:"activePage"`
+	_ string `property:"panicError"`
 }
 
 func main() {
@@ -68,17 +69,17 @@ func main() {
 func initListeners(viewModel *ViewModel) {
 	statusChan = make(chan string)
 	switchPageChan = make(chan string)
+	panicChan = make(chan error)
 	/*
-		panicChan = make(chan error)
 		stopMiningChan = make(chan bool)
 		hashrateChan = make(chan int)*/
 
 	go initStatusListener(viewModel)
 	go switchPageListener(viewModel)
-	/*go panicListener(view)
-
-	go hashrateListener(view)
-	go httpListener(view)*/
+	go panicListener(viewModel)
+	/*
+		go hashrateListener(view)
+		go httpListener(view)*/
 }
 
 func initStatusListener(viewModel *ViewModel) {
@@ -88,15 +89,15 @@ func initStatusListener(viewModel *ViewModel) {
 	}
 }
 
-/*func panicListener(view *webengine.QWebEngineView) {
+func panicListener(viewModel *ViewModel) {
 	for {
 		err := <-panicChan
-		errString := strings.Replace(err.Error(), "'", "''", -1)
-		script := fmt.Sprintf("setPanic('%s')", errString)
-		view.Page().RunJavaScript(script)
+		viewModel.SetPanicError(err.Error())
+		viewModel.SetActivePage("panic")
 	}
 }
 
+/*
 func hashrateListener(view *webengine.QWebEngineView) {
 	for {
 		hashRate := <-hashrateChan
@@ -115,12 +116,15 @@ func switchPageListener(viewModel *ViewModel) {
 
 func setup() {
 	statusChan <- "Checking for miners dir"
+
 	if _, err := os.Stat("./miners"); os.IsNotExist(err) {
 		err := os.Mkdir("./miners", 0755)
 		if err != nil {
 			panic(err)
 		}
 	}
+
+	statusChan <- "Trying to figure out your GPU..."
 
 	gpuVendor := GetGPU()
 	switch {

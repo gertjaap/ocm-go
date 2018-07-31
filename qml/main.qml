@@ -48,6 +48,50 @@ ApplicationWindow {
         width: parent.width
         height: parent.height 
         color: "#202225"
+        opacity: { 
+            if(viewModel.activePage == "panic") {
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+
+        Column {
+            anchors.centerIn: parent
+            spacing: 15
+            Text {
+                id: panicTitle
+                text: "Vertcoin - OneClick Miner"
+                font.pointSize: 16
+                font.weight: Font.DemiBold
+                color: "#555555"
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+
+            Text {
+                id: panicStatus
+                text: "Sorry, something went horribly wrong:"
+                font.pointSize: 14
+                font.weight: Font.Light
+                color: "#555555"
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+
+            Text {
+                id: panicStatusDetail
+                text: viewModel.panicError
+                font.pointSize: 14
+                font.weight: Font.Light
+                color: "#555555"
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+        }
+    }
+
+    Rectangle {
+        width: parent.width
+        height: parent.height 
+        color: "#202225"
 
         opacity: { 
             if(viewModel.activePage == "start") {
